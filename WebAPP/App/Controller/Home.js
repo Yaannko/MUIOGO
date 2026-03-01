@@ -19,6 +19,9 @@ export default class Home {
                 Message.smallBoxInfo('Sync message', response.message, 3000);
                 Base.INIT_SYNC = 0;
             })
+        } else {
+            $('#loadermain h4').text('Loading cases...');
+            $('#loadermain').show();
         }
         Base.getSession()
         .then(response =>{
@@ -28,13 +31,13 @@ export default class Home {
 
             let cases = Base.getCaseStudies();
             promise.push(cases);
-            $('#loadermain').hide();
             return Promise.all(promise);
         })
         .then(data => {
             let [ casename, cases] = data;
             let model = new Model(casename, cases);
             this.initPage(model);
+            $('#loadermain').hide();
         })
         .catch(error =>{ 
             Message.danger(error);
@@ -52,6 +55,8 @@ export default class Home {
     }
 
     static refreshPage(casename){
+        $('#loadermain h4').text('Loading cases...');
+        $('#loadermain').show();
         Base.setSession(casename)
         .then(response =>{
             const promise = [];
