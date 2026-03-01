@@ -59,6 +59,10 @@ For setup options, use the "--help" flag:
 - macOS / Linux: `./scripts/setup.sh --help`
 - Windows: `scripts\setup.bat --help`
 
+## Troubleshooting
+
+For common setup issues, especially on **macOS (Apple Silicon)**, please refer to the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+
 ## Demo Data
 
 - Archive: `assets/demo-data/CLEWs.Demo.zip`
