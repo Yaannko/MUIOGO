@@ -137,23 +137,38 @@ def _ensure_secret_key_in_env() -> bool:
             _print_fail("Could not read .env file", str(exc))
             return False
 
-    for raw_line in lines:
+    key_line_index: int | None = None
+    for i, raw_line in enumerate(lines):
         line = raw_line.strip()
         if line.startswith("MUIOGO_SECRET_KEY="):
-            _print_pass("MUIOGO_SECRET_KEY already configured", str(ENV_FILE))
-            return True
+            value = line.split("=", 1)[1].strip()
+            if value:
+                _print_pass("MUIOGO_SECRET_KEY already configured", str(ENV_FILE))
+                return True
+            key_line_index = i  # empty value — will replace below
 
     existing_key = os.environ.get("MUIOGO_SECRET_KEY", "").strip()
     new_key = existing_key or secrets.token_hex(32)
-    if lines and lines[-1] != "":
-        lines.append("")
-    lines.append(f"MUIOGO_SECRET_KEY={new_key}")
+    new_entry = f"MUIOGO_SECRET_KEY={new_key}"
+
+    if key_line_index is not None:
+        lines[key_line_index] = new_entry
+    else:
+        if lines and lines[-1] != "":
+            lines.append("")
+        lines.append(new_entry)
 
     try:
         ENV_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
     except Exception as exc:
         _print_fail("Could not write .env file", str(exc))
         return False
+
+    if SYSTEM != "Windows":
+        try:
+            os.chmod(ENV_FILE, 0o600)
+        except OSError:
+            pass  # best-effort
 
     if existing_key:
         _print_pass("Persisted existing MUIOGO_SECRET_KEY to .env", str(ENV_FILE))
