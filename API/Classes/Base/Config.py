@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 import platform
 
 # Central path validation utility (prevents path traversal)
@@ -32,7 +32,7 @@ def validate_path(base_dir, user_input):
     return target_abs
 
 #load environment variables
-#load_dotenv()
+load_dotenv()
 
 SYSTEM = platform.system()
 
