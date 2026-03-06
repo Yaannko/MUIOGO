@@ -522,11 +522,26 @@ def _install_glpk_windows_manual() -> bool:
         with zipfile.ZipFile(tmp_path, "r") as zf:
             _safe_extract_zip(zf, install_dir)
 
-        matches = list(install_dir.rglob("glpsol.exe"))
-        if not matches:
+        extract_root = install_dir / f"glpk-{_GLPK_WINDOWS_VERSION}"
+        machine = platform.machine().lower()
+
+        # Windows ARM64 uses the x64 GLPK build via emulation.
+        preferred_subdirs = (
+            ["w64", "w32"]
+            if machine in {"amd64", "x86_64", "arm64", "aarch64"}
+            else ["w32", "w64"]
+        )
+
+        bin_dir: Path | None = None
+        for subdir in preferred_subdirs:
+            candidate = extract_root / subdir / "glpsol.exe"
+            if candidate.is_file():
+                bin_dir = candidate.parent
+                break
+
+        if bin_dir is None:
             _print_fail("glpsol.exe not found in extracted archive")
             return False
-        bin_dir = matches[0].parent
 
         _windows_add_to_user_path(bin_dir)
         _print_pass("GLPK installed", str(bin_dir))
